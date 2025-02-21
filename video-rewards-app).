@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاهدة الفيديو وكسب عملة A</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 0;
+            font-size: 20px;
+        }
+        .container {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        video {
+            width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .balance, .level {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .progress-bar {
+            width: 100%;
+            background: #ddd;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: #28a745;
+            transition: width 0.5s;
+        }
+        #countdown {
+            font-size: 18px;
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header><h1>مشاهدة الفيديو وكسب عملة A</h1></header>
+
+    <div class="container">
+        <button id="dailyRewardBtn">احصل على مكافأتك اليومية</button>
+        <video id="videoPlayer" controls>
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            متصفحك لا يدعم عرض الفيديو.
+        </video>
+        <p>يجب مشاهدة 40 ثانية على الأقل للحصول على المكافأة</p>
+        <div id="countdown">40 ثانية متبقية</div>
+
+        <button id="watchButton">شاهد الفيديو</button>
+        <button id="likeButton">أعجبني + مشاهدة</button>
+        <button id="subscribeButton">اشترك + مشاهدة</button>
+
+        <div class="balance">رصيدك الحالي: <span id="currentBalance">0</span> عملة A</div>
+        <div class="level">المستوى الحالي: <span id="userLevel">1</span></div>
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
+
+        <button id="paypalWithdrawBtn">سحب الأرباح عبر PayPal</button>
+        <button id="fastWithdrawBtn">سحب سريع (رسوم 10%)</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const watchButton = document.getElementById('watchButton');
+        const likeButton = document.getElementById('likeButton');
+        const subscribeButton = document.getElementById('subscribeButton');
+        const currentBalanceElement = document.getElementById('currentBalance');
+        const userLevelElement = document.getElementById('userLevel');
+        const progressBar = document.getElementById('progress');
+        const countdownElement = document.getElementById('countdown');
+        const paypalWithdrawBtn = document.getElementById('paypalWithdrawBtn');
+        const fastWithdrawBtn = document.getElementById('fastWithdrawBtn');
+        const dailyRewardBtn = document.getElementById('dailyRewardBtn');
+
+        let currentBalance = 0;
+        let userLevel = 1;
+        let hasClaimedDailyReward = false;
+        let timeWatched = 0;
+
+        // نظام كشف التلاعب (مراقبة تقدم الفيديو)
+        let lastTime = 0;
+        video.addEventListener('timeupdate', () => {
+            if (video.currentTime < lastTime) {
+                alert("تم اكتشاف تلاعب! لا يمكن تقديم الفيديو.");
+                video.currentTime = lastTime;
+            }
+            lastTime = video.currentTime;
+            timeWatched = Math.floor(video.currentTime);
+            countdownElement.textContent = `${Math.max(40 - timeWatched, 0)} ثانية متبقية`;
+        });
+
+        function checkVideoProgress() {
+            if (video.currentTime < 40) {
+                alert('يجب مشاهدة الفيديو 40 ثانية على الأقل!');
+                return false;
+            }
+            return true;
+        }
+
+        watchButton.addEventListener('click', () => {
+            if (!checkVideoProgress()) return;
+            currentBalance += 10;
+            updateBalance();
+        });
+
+        likeButton.addEventListener('click', () => {
+            if (!checkVideoProgress()) return;
+            currentBalance += 15;
+            updateBalance();
+        });
+
+        subscribeButton.addEventListener('click', () => {
+            if (!checkVideoProgress()) return;
+            currentBalance += 20;
+            updateBalance();
+        });
+
+        paypalWithdrawBtn.addEventListener('click', () => {
+            if (currentBalance >= 10000) {
+                alert(`تم سحب ${currentBalance / 10000} دولار عبر PayPal.`);
+                currentBalance = 0;
+                updateBalance();
+            } else {
+                alert('يجب أن يكون لديك 10,000 عملة A على الأقل.');
+            }
+        });
+
+        fastWithdrawBtn.addEventListener('click', () => {
+            if (currentBalance >= 5000) {
+                let amount = (currentBalance / 10000) * 0.9; // خصم 10%
+                alert(`تم السحب السريع بقيمة ${amount.toFixed(2)} دولار بعد خصم الرسوم.`);
+                currentBalance = 0;
+                updateBalance();
+            } else {
+                alert('يجب أن يكون لديك 5,000 عملة A على الأقل للسحب السريع.');
+            }
+        });
+
+        dailyRewardBtn.addEventListener('click', () => {
+            if (!hasClaimedDailyReward) {
+                currentBalance += 200;
+                alert("تم استلام مكافأتك اليومية: 200 عملة!");
+                hasClaimedDailyReward = true;
+                updateBalance();
+            } else {
+                alert("لقد استلمت مكافأتك اليوم بالفعل!");
+            }
+        });
+
+        function updateBalance() {
+            currentBalanceElement.textContent = currentBalance;
+            userLevelElement.textContent = userLevel;
+            progressBar.style.width = `${(currentBalance / 10000) * 100}%`;
+        }
+
+    </script>
+</body>
+</html>
